@@ -29,10 +29,11 @@ void displayOFF();
 void ledOFF();
 void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6);
 void comms_init();
+void comm_reset();
 
 void setup() {
   
-  Serial.begin(9600);
+  Serial.begin(38400);
   BT.begin(38400);
   
   pinMode(BUT1,INPUT);
@@ -63,8 +64,8 @@ void loop() {
 
     while(BT.available()){
       comm[cont] = BT.read();
-      Serial.print(comm[cont]); // POR QUE NO FUNCIONA SIN ESTA LINEA?
       cont++;
+      delay(20);
     }
 
     switch(comm[3]){
@@ -79,6 +80,7 @@ void loop() {
       Serial.println("Pedido ingresado correctamente.");
       digitalWrite(LED_RED, HIGH);
       m = 0;
+      comm_reset();
       break;
 
     case 83:
@@ -87,6 +89,7 @@ void loop() {
       }
 
       Serial.println("Stock actualizado correctamente.");
+      comm_reset();
       break;
 
     case 86:
@@ -106,6 +109,10 @@ void loop() {
       
       digitalWrite(LED_GREEN, HIGH);
       m = 1;
+      comm_reset();
+      break;
+
+    case '\n':
       break;
 
     default:
@@ -114,7 +121,7 @@ void loop() {
       Serial.println("[P] para realizar un pedido.");
       Serial.println("[S] para actualizar el Stock.");
       Serial.println("[V] para visualizar el Stock actual.");
-
+      comm_reset();
       break;
     }
   }
@@ -264,4 +271,10 @@ void comms_init(){
     Serial.write(BT.read());
 
   Serial.println("Listo para conectarse.");
+}
+
+void comm_reset(){
+  for(byte i = 0; i < 20; i++){
+    comm[i] = 0;
+  }
 }
