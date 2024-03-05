@@ -17,16 +17,18 @@
 
 SoftwareSerial BT(10,11);
 
-int p[6] = {0,0,0,0,0,0};
-int stock[6] = {0, 0, 0, 0, 0, 0};
-int comm[40];
-int m, n, cont = 0;
+unsigned int p[6] = {0,0,0,0,0,0};
+unsigned int stock[6] = {0, 0, 0, 0, 0, 0};
+unsigned int comm[20];
+byte m, n;
+unsigned int cont = 0;
 unsigned char numero[] = {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0X80,0X90,0XFF};
 
 void display();
 void displayOFF();
 void ledOFF();
 void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6);
+void comms_init();
 
 void setup() {
   
@@ -49,16 +51,19 @@ void setup() {
   pinMode(RELOJ, OUTPUT);
   pinMode(DATOS, OUTPUT);
 
+  comms_init();
+
 }
 
 void loop() {
 
   cont = 0;
   
-  if(BT.available() > 0){
+  if(BT.available()){
 
     while(BT.available()){
       comm[cont] = BT.read();
+      Serial.print(comm[cont]); // POR QUE NO FUNCIONA SIN ESTA LINEA?
       cont++;
     }
 
@@ -103,9 +108,6 @@ void loop() {
       m = 1;
       break;
 
-    case '\n':
-      break;
-
     default:
       Serial.println("Comando incorrecto.");
       Serial.println("Los comandos disponibles son:");
@@ -139,7 +141,7 @@ void loop() {
 
 void display(){
   
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
   
    if(p[i] == 0){
       
@@ -148,7 +150,7 @@ void display(){
    }
   }
 
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
     
     digitalWrite(LATCH, LOW);
     shiftOut(DATOS, RELOJ, MSBFIRST, numero[p[i]]);
@@ -161,7 +163,7 @@ void display(){
 
 void displayStock(){
 
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
     
     	digitalWrite(LATCH, LOW);
     	shiftOut(DATOS, RELOJ, MSBFIRST, numero[stock[i]]);
@@ -174,13 +176,13 @@ void displayStock(){
 
 void displayOFF(){
 
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
   
    p[i] = 10;
 
   }
   
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
     digitalWrite(LATCH, LOW);
     shiftOut(DATOS, RELOJ, MSBFIRST, numero[10]);
     shiftOut(DATOS, RELOJ, MSBFIRST, B00000001 << i);
@@ -197,9 +199,9 @@ void displayOFF(){
 
 void ledOFF(){
   
-  int ver = 0;
+  byte ver = 0;
   
-  for(int i = 0; i < 6; i++){
+  for(byte i = 0; i < 6; i++){
     
     if(p[i] == 10){
       
@@ -240,4 +242,26 @@ void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6){
     p[5] = 10;
     
   }
+}
+
+void comms_init(){
+  Serial.println("Iniciando...");
+  delay(200);
+
+  BT.print("AT\r\n");
+  delay(200);
+
+  BT.print("AT+ROLE?\r\n");
+  delay(200);  
+
+  BT.print("AT+UART?\r\n");
+  delay(200);
+
+  BT.print("AT+ADDR?\r\n");
+  delay(200);
+
+  while(BT.available())
+    Serial.write(BT.read());
+
+  Serial.println("Listo para conectarse.");
 }
