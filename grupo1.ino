@@ -31,8 +31,7 @@ void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6);
 void comms_init();
 void comm_reset();
 
-void setup() {
-  
+void setup() { 
   Serial.begin(38400);
   BT.begin(38400);
   
@@ -53,7 +52,6 @@ void setup() {
   pinMode(DATOS, OUTPUT);
 
   comms_init();
-
 }
 
 void loop() {
@@ -61,7 +59,6 @@ void loop() {
   cont = 0;
   
   if(BT.available()){
-
     while(BT.available()){
       comm[cont] = BT.read();
       cont++;
@@ -147,46 +144,34 @@ void loop() {
 }
 
 void display(){
-  
   for(byte i = 0; i < 6; i++){
-  
    if(p[i] == 0){
-      
     p[i] = 10;
-    
    }
   }
 
   for(byte i = 0; i < 6; i++){
-    
     digitalWrite(LATCH, LOW);
     shiftOut(DATOS, RELOJ, MSBFIRST, numero[p[i]]);
     shiftOut(DATOS, RELOJ, MSBFIRST, B00000001 << i); // ver si es en ese orden o al reves
     digitalWrite(LATCH, HIGH);
     delay(2);
   }
-
 }
 
 void displayStock(){
-
   for(byte i = 0; i < 6; i++){
-    
-    	digitalWrite(LATCH, LOW);
-    	shiftOut(DATOS, RELOJ, MSBFIRST, numero[stock[i]]);
-    	shiftOut(DATOS, RELOJ, MSBFIRST, B00000001 << i);  // ver si es en ese orden o al reves
-    	digitalWrite(LATCH, HIGH);
-   	 	delay(2);
-   }
-
+    digitalWrite(LATCH, LOW);
+    shiftOut(DATOS, RELOJ, MSBFIRST, numero[stock[i]]);
+    shiftOut(DATOS, RELOJ, MSBFIRST, B00000001 << i);  // ver si es en ese orden o al reves
+    digitalWrite(LATCH, HIGH);
+   	delay(2);
+  }
 }
 
 void displayOFF(){
-
   for(byte i = 0; i < 6; i++){
-  
-   p[i] = 10;
-
+    p[i] = 10;
   }
   
   for(byte i = 0; i < 6; i++){
@@ -195,7 +180,7 @@ void displayOFF(){
     shiftOut(DATOS, RELOJ, MSBFIRST, B00000001 << i);
     digitalWrite(LATCH, HIGH);
    	delay(2);
-    }
+  }
   
   digitalWrite(LED_RED, LOW);
   digitalWrite(LED_GREEN, LOW);
@@ -209,13 +194,10 @@ void ledOFF(){
   byte ver = 0;
   
   for(byte i = 0; i < 6; i++){
-    
     if(p[i] == 10){
-      
     ver++;
-    
     }
-  } 
+  }
   
   if(ver == 6){
     digitalWrite(LED_RED, LOW);
@@ -225,7 +207,7 @@ void ledOFF(){
 void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6){
   
   if(Bu1 == 1){
-    
+
     p[0] = 10;
     
   } else if(Bu2 == 1){
