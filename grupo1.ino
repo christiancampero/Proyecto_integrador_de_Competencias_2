@@ -137,7 +137,7 @@ void loop() {
 
   }
 
-  BUT_OFF(digitalRead(BUT1), digitalRead(BUT2), digitalRead(BUT3), digitalRead(BUT4), digitalRead(BUT5), digitalRead(BUT6));
+  BUT_OFF(analogRead(BUT1), analogRead(BUT2), analogRead(BUT3), analogRead(BUT4), analogRead(BUT5), analogRead(BUT6));
 
   ledOFF();
 
@@ -206,27 +206,27 @@ void ledOFF(){
 
 void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6){
   
-  if(Bu1 == 1){
+  if(Bu1 >= 990){
 
     p[0] = 10;
     
-  } else if(Bu2 == 1){
+  } else if(Bu2 >= 990){
     
     p[1] = 10;
     
-  } else if(Bu3 == 1){
+  } else if(Bu3 >= 990){
     
     p[2] = 10;
     
-  } else if(Bu4 == 1){
+  } else if(Bu4 >= 990){
     
     p[3] = 10;
     
-  } else if(Bu5 == 1){
+  } else if(Bu5 >= 990){
     
     p[4] = 10;
     
-  } else if(Bu6 == 1){
+  } else if(Bu6 >= 990){
     
     p[5] = 10;
     
