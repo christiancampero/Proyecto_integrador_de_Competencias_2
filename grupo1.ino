@@ -15,7 +15,7 @@
 #define RELOJ 2
 #define DATOS 7
 
-SoftwareSerial BT(10,11);
+SoftwareSerial BT(10, 11);
 
 unsigned int p[6] = {0,0,0,0,0,0};
 unsigned int stock[6] = {0, 0, 0, 0, 0, 0};
@@ -23,6 +23,7 @@ unsigned int comm[20];
 byte m, n;
 unsigned int cont = 0;
 unsigned char numero[] = {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0X80,0X90,0XFF};
+bool e = false;
 
 void display();
 void displayOFF();
@@ -32,8 +33,8 @@ void comms_init();
 void comm_reset();
 
 void setup() { 
-  Serial.begin(38400);
-  BT.begin(38400);
+  Serial.begin(9600); // Baud de estandar.
+  BT.begin(9600); // Baud de estandar.
   
   pinMode(BUT1,INPUT);
   pinMode(BUT2,INPUT);
@@ -56,6 +57,7 @@ void setup() {
 
 void loop() {
 
+  e = false;
   cont = 0;
   
   if(BT.available()){
@@ -66,60 +68,66 @@ void loop() {
     }
 
     switch(comm[3]){
+      case 66: // Ascii para "B", realizar pedido.
+        for(int k = 0; k < 6; k++){
+          p[k] = (comm[k+4] - 48);
 
-    case 80:
-      for(int k = 0; k < 6; k++){
-        p[k] = (comm[k+4] - 48);
+          if(p[k] > stock[k]){  // Evalúa si hay stock.
+            e = true;
+            break;
+          }
+        }
 
-        stock[k] = stock[k] - p[k];
-      }
-    
-      Serial.println("Pedido ingresado correctamente.");
-      digitalWrite(LED_RED, HIGH);
-      m = 0;
-      comm_reset();
-      break;
-
-    case 83:
-      for(int k = 0; k < 6; k++){
-        stock[k] = (comm[k+4] - 48);
-      }
-
-      Serial.println("Stock actualizado correctamente.");
-      comm_reset();
-      break;
-
-    case 86:
-      Serial.println("El stock actual es:");
-      Serial.print("Diodo [101]: ");
-      Serial.println(stock[0]);
-      Serial.print("Transistor [102]: ");
-      Serial.println(stock[1]);
-      Serial.print("Capacitor [103]: ");
-      Serial.println(stock[2]);
-      Serial.print("LED [201]: ");
-      Serial.println(stock[3]);
-      Serial.print("Resistencia 1K [202]: ");
-      Serial.println(stock[4]);
-      Serial.print("Resistencia 330 [203]: ");
-      Serial.println(stock[5]);
+        if(e){
+          BT.write("AT$E\r\n"); // Mensaje de error de stock.
+        } else{
+          for(int k = 0; k < 6; k++){
+            stock[k] = stock[k] - p[k];
+          }
+          BT.write("OK\r\n"); // Respuesta de no error.
+          digitalWrite(LED_RED, HIGH);  // Indicador de realizando pedido.
+          m = 0;
+        }
       
-      digitalWrite(LED_GREEN, HIGH);
-      m = 1;
-      comm_reset();
-      break;
+        comm_reset();
+        break;
 
-    case '\n':
-      break;
+      case 65:  // Ascii para "A", actualizar stock.
+        int kt = 0;
+        for(int k = 0; k < 6; k ++){
+          stock[k] += (comm[kt+4] - 48);
+          kt += 2;
+        }
 
-    default:
-      Serial.println("Comando incorrecto.");
-      Serial.println("Los comandos disponibles son:");
-      Serial.println("[P] para realizar un pedido.");
-      Serial.println("[S] para actualizar el Stock.");
-      Serial.println("[V] para visualizar el Stock actual.");
-      comm_reset();
-      break;
+        BT.write("AT$");  // Mensaje de respuesta a actualizar stock.
+        for(int k = 0; k < 6; k++){
+          BT.write(stock[k]);
+          BT.write("*");
+        }
+        BT.write("\r\n");
+
+        comm_reset();
+        break;
+
+      case 67:  // Ascii para "C", mostrar stock.
+        BT.write("AT$");  // Mensaje de respuesta a mostrar stock.
+        for(int k = 0; k < 6; k++){
+          BT.write(stock[k]);
+          BT.write(",");
+        }
+        BT.write("\r\n");
+        
+        digitalWrite(LED_GREEN, HIGH);  // Indicador de mostrando stock.
+        m = 1;
+        comm_reset();
+        break;
+
+      case '\n':
+        break;
+
+      default:
+        comm_reset();
+        break;
     }
   }
 

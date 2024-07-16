@@ -1,1 +1,15 @@
+      [Estandar desarrollado por equipo de control, aceptado por todos los equipos]
+Comando		  Acción		   EJ:	              Respuesta	           Notas
+  AT	     Comprobar conexión.           AT                    OK
+ AT$A         Actualizar stock.      AT$A5*4*7*4*2*6        AT$4*3*7*6*5*7         (*)
+ AT$B           Hacer pedido.          AT$B123456             OK o AT$E            (**)
+ AT$C           Mostrar stock.            AT$C              AT$6,4,7,3,6,4         (***)
 
+					Baudrate
+				Serial		  9600
+				Bluetooth         9600
+
+Notas:
+(*) Se separan las casillas con "*". devuelve stock antiguo sumado al nuevo.
+(**) OK cuando se complete el pedido (botones pulsados) o AT$E para error por falta de stock.
+(***) Se separan las casillas con ",".
