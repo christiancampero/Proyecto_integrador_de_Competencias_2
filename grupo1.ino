@@ -84,7 +84,6 @@ void loop() {
           for(int k = 0; k < 6; k++){
             stock[k] = stock[k] - p[k];
           }
-          BT.write("OK\r\n"); // Respuesta de no error.
           digitalWrite(LED_RED, HIGH);  // Indicador de realizando pedido.
           m = 0;
         }
@@ -209,6 +208,7 @@ void ledOFF(){
   
   if(ver == 6){
     digitalWrite(LED_RED, LOW);
+    BT.write("OK\r\n"); // Respuesta de no error.
   }
 }
 
