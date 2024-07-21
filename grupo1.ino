@@ -29,7 +29,6 @@ void display();
 void displayOFF();
 void ledOFF();
 void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6);
-void comms_init();
 void comm_reset();
 
 void setup() { 
@@ -52,7 +51,7 @@ void setup() {
   pinMode(RELOJ, OUTPUT);
   pinMode(DATOS, OUTPUT);
 
-  comms_init();
+  Serial.println("Listo para conectarse.");
 }
 
 void loop() {
@@ -84,10 +83,26 @@ void loop() {
           for(int k = 0; k < 6; k++){
             stock[k] = stock[k] - p[k];
           }
+          BT.write("OK\r\n"); // Respuesta de no error.
           digitalWrite(LED_RED, HIGH);  // Indicador de realizando pedido.
           m = 0;
         }
       
+        comm_reset();
+        break;
+
+      case 67:  // Ascii para "C", mostrar stock.
+        BT.write("AT$");  // Mensaje de respuesta a mostrar stock.
+        for(int k = 0; k < 5; k++){
+          BT.write((stock[k] + 48));
+          BT.write(",");
+        }
+        BT.write((stock[5] + 48));
+        BT.write("\r\n");
+        
+        digitalWrite(LED_GREEN, HIGH);  // Indicador de mostrando stock.
+        m = 1;
+        
         comm_reset();
         break;
 
@@ -97,27 +112,15 @@ void loop() {
           stock[k] += (comm[kt+4] - 48);
           kt += 2;
         }
-
+        
         BT.write("AT$");  // Mensaje de respuesta a actualizar stock.
-        for(int k = 0; k < 6; k++){
-          BT.write(stock[k]);
+        for(int k = 0; k < 5; k++){
+          BT.write((stock[k] + 48));
           BT.write("*");
         }
-        BT.write("\r\n");
-
-        comm_reset();
-        break;
-
-      case 67:  // Ascii para "C", mostrar stock.
-        BT.write("AT$");  // Mensaje de respuesta a mostrar stock.
-        for(int k = 0; k < 6; k++){
-          BT.write(stock[k]);
-          BT.write(",");
-        }
+        BT.write((stock[5] + 48));
         BT.write("\r\n");
         
-        digitalWrite(LED_GREEN, HIGH);  // Indicador de mostrando stock.
-        m = 1;
         comm_reset();
         break;
 
@@ -208,7 +211,6 @@ void ledOFF(){
   
   if(ver == 6){
     digitalWrite(LED_RED, LOW);
-    BT.write("OK\r\n"); // Respuesta de no error.
   }
 }
 
@@ -239,28 +241,6 @@ void BUT_OFF(int Bu1, int Bu2, int Bu3, int Bu4, int Bu5, int Bu6){
     p[5] = 10;
     
   }
-}
-
-void comms_init(){
-  Serial.println("Iniciando...");
-  delay(200);
-
-  BT.print("AT\r\n");
-  delay(200);
-
-  BT.print("AT+ROLE?\r\n");
-  delay(200);  
-
-  BT.print("AT+UART?\r\n");
-  delay(200);
-
-  BT.print("AT+ADDR?\r\n");
-  delay(200);
-
-  while(BT.available())
-    Serial.write(BT.read());
-
-  Serial.println("Listo para conectarse.");
 }
 
 void comm_reset(){
